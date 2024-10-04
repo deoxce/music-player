@@ -1,0 +1,105 @@
+@font-face {
+    font-family: 'Gantari';
+    src: url(fonts/Gantari-Thin.ttf);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    font-family: 'Gantari';
+    user-select: none;
+}
+
+body {
+    background-color: #2a2a2a;
+    overflow-y: hidden;
+}
+
+.titleBar {
+    background: #282828;
+    height: 35px;
+    display: flex;
+    justify-content: space-between;
+    -webkit-app-region: drag;
+}
+
+.titleBarButtons {
+    display: flex;
+    justify-content: right;
+    -webkit-app-region: none;
+}
+
+.titleBarMenu {
+    display: flex;
+    justify-content: left;
+    -webkit-app-region: none;
+    padding-left: 2.5px;
+}
+
+/* menu options */
+
+.topOption {
+    font-size: 14px;
+    padding: 5px 2.5px 5px 2.5px;
+    height: 25px;
+    color: white;
+}
+
+.optionHighlight {
+    padding: 4px 6px;
+    border-radius: 6px;
+    transition: 0.2s;
+}
+
+.topOption:hover .optionHighlight {
+    background-color: #373737;
+    cursor: pointer;
+}
+
+.topOption:active .optionHighlight {
+    background-color: #5865f2;
+    transition: 0s;
+}
+
+.topOption:hover {
+    cursor: pointer;
+}
+
+/* minimize maximize close buttons */
+
+.minimizeButton {
+    background: url(img/window-minimize.svg) center no-repeat;
+}
+
+.maximizeButton {
+    background: url(img/window-maximize.svg) center no-repeat;
+}
+
+.closeButton {
+    background: url(img/window-close.svg) center no-repeat;
+}
+
+.buttonHighlight {
+    background-size: 20px;
+    width: 22.5px;
+    height: 22.5px;
+    margin: 5px;
+    transition: 0.2s;
+    border-radius: 6px;
+}
+
+.windowButton:hover .buttonHighlight {
+    width: 35px;
+    height: 35px;
+    transition: 0.2s;
+    background-color: #373737;
+}
+
+.windowButton:hover {
+    cursor: pointer;
+}
+
+.windowButton:active .buttonHighlight{
+    transition: 0s;
+    background-color: #5865f2;
+}
