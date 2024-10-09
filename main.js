@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 
 const ipc = ipcMain;
+app.disableHardwareAcceleration();
 
 function createWindow() {
     const window = new BrowserWindow({
@@ -27,7 +28,7 @@ function createWindow() {
     });
 
     ipc.on('maximizeRestoreApp', () => {
-        if(window.isMaximized()) {
+        if (window.isMaximized()) {
             window.restore();
         } else {
             window.maximize();
