@@ -25,9 +25,15 @@
             </div>
         </div>
         <div class="title-bar-buttons">
-            <div id="minimizeButton" class="window-button"><div class="button-highlight minimize-button"></div></div>
-            <div id="maximizeButton" class="window-button"><div class="button-highlight maximize-button"></div></div>
-            <div id="closeButton" class="window-button"><div class="button-highlight close-button"></div></div>
+            <div id="minimizeButton" class="window-button">
+                <div class="button-highlight minimize-button"></div>
+            </div>
+            <div id="maximizeButton" class="window-button">
+                <div class="button-highlight maximize-button"></div>
+            </div>
+            <div id="closeButton" class="window-button">
+                <div class="button-highlight close-button"></div>
+            </div>
         </div>
     </div>
 
@@ -41,15 +47,20 @@
         </div>
     </div>
 
-    <div class="playbar">
+    <div class="main-window">
+        <div class="songs-list"></div>
+        <div class="custom-scrollbar">
+            <div class="custom-thumb"></div>
+        </div>
+    </div>
 
+    <div class="playbar">
         <div class="playbar-left">
             <div class="song-info-container">
                 <p class="playing-song-title"></p>
                 <p class="playing-song-artist"></p>
             </div>
         </div>
-
         <div class="playbar-center">
             <div class="play-pause"></div>
             <div class="slider-container" id="progress">
@@ -58,22 +69,12 @@
                 <div class="slider-thumb"></div>
             </div>
         </div>
-
         <div class="playbar-right">
             <div class="slider-container" id="volume">
                 <div class="slider-track"></div>
                 <div class="slider-progress"></div>
                 <div class="slider-thumb"></div>
             </div>
-        </div>
-    </div>
-
-    <div class="main-window">
-        <div class="songs-list">
-
-        </div>
-        <div class="custom-scrollbar">
-            <div class="custom-thumb"></div>
         </div>
     </div>
 

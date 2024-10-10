@@ -96,12 +96,12 @@ volumeSliderContainer.addEventListener('mousedown', (event) => {
     moveVolumeThumb(event);
 
     isDraggingVolume = true;
-    volumeSliderThumb.classList.add('active');
+    volumeSliderThumb.style.backgroundColor = 'white';
 });
 
 document.addEventListener('mouseup', (event) => {
     isDraggingVolume = false;
-    volumeSliderThumb.classList.remove('active');
+    volumeSliderThumb.style.backgroundColor = '';
 });
 
 document.addEventListener('mousemove', (event) => {
@@ -141,7 +141,6 @@ progressSliderContainer.addEventListener('mousedown', (event) => {
     moveProgressThumb(event);
 
     isDraggingProgress = true;
-    progressSliderThumb.classList.add('active');
 });
 
 document.addEventListener('mouseup', (event) => {
@@ -150,7 +149,6 @@ document.addEventListener('mouseup', (event) => {
     }
 
     isDraggingProgress = false;
-    progressSliderThumb.classList.remove('active');
 });
 
 document.addEventListener('mousemove', (event) => {
@@ -193,15 +191,6 @@ setInterval(() => {
 const container = document.querySelector('.main-window');
 const content = document.querySelector('.songs-list');
 const thumb = document.querySelector('.custom-thumb');
-const scrollbar = document.querySelector('.custom-scrollbar');
-
-scrollbar.addEventListener('mousedown', (event) => {
-    thumb.classList.add('active');
-});
-
-document.addEventListener('mouseup', (event) => {
-    thumb.classList.remove('active');
-});
 
 // Расчёт высоты ползунка в зависимости от содержимого
 const updateThumbHeight = () => {
@@ -215,7 +204,7 @@ const updateThumbHeight = () => {
 const updateThumbPosition = () => {
     const contentScrollTop = content.scrollTop;
     const contentHeight = content.scrollHeight;
-    const containerHeight = container.clientHeight;
+    const containerHeight = container.clientHeight - 9;
     const scrollRatio = contentScrollTop / (contentHeight - containerHeight);
     const thumbTop = scrollRatio * (containerHeight - thumb.clientHeight);
     thumb.style.top = `${thumbTop}px`;
