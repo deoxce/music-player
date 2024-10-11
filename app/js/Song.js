@@ -1,15 +1,21 @@
 const { selectCover, parseFile } = require('music-metadata');
 const fs = require('fs');
+const path = require('path');
 
 export default class Song {
     async addMetadata(pathToDir, filename) {
         const pathToSong = `${pathToDir}${filename}`;
         const metadata = await parseFile(pathToSong);
 
+        this.pathToSong = String(pathToSong);
+
+        // console.log(metadata.common);
+
         this.filename = filename;
         this.title = String(metadata.common.title);
         this.artists = metadata.common.artists ? metadata.common.artists : ['undefined'];
         this.album = String(metadata.common.album);
+        this.albumartist = String(metadata.common.albumartist);
         this.year = String(metadata.common.year);
 
         this.codec = metadata.format.codec;
@@ -27,16 +33,32 @@ export default class Song {
         }
     }
 
-    static async getSongs(pathToDir) {
+    static async getSongs(pathToDir, albums = {}) {
         const files = fs.readdirSync(pathToDir);
-        let songs = [];
+        const extensions = ['.mp3', '.flac'];
     
         for (const filename of files) {
-            const song = new Song();
-            await song.addMetadata(pathToDir, filename);
-            songs.push(song);
+            const filePath = path.join(pathToDir, filename);
+            const stats = fs.statSync(filePath);
+
+            if (stats.isDirectory()) {
+                await this.getSongs(filePath + '/', albums);
+            } else {
+                const ext = path.extname(filename);
+                if (extensions.includes(ext)) {
+                    const song = new Song();
+                    await song.addMetadata(pathToDir, filename);
+
+                    const songAlbum = String(song.album);
+                    if (!(songAlbum in albums)) {
+                        albums[songAlbum] = [];
+                    }
+
+                    albums[songAlbum].push(song);
+                }
+            }
         }
     
-        return songs;
+        return albums;
     }
 }

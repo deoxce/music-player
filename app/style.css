@@ -1,5 +1,11 @@
 @font-face {
     font-family: 'Inter';
+    src: url(fonts/Inter-ExtraLight.ttf);
+    font-weight: 200;
+}
+
+@font-face {
+    font-family: 'Inter';
     src: url(fonts/Inter-Light.ttf);
     font-weight: 300;
 }
@@ -16,6 +22,30 @@
     font-weight: 500;
 }
 
+@font-face {
+    font-family: 'Circular';
+    src: url(fonts/CircularStd-Black.ttf);
+    font-weight: 700;
+}
+
+@font-face {
+    font-family: 'Circular';
+    src: url(fonts/CircularStd-Bold.ttf);
+    font-weight: 600;
+}
+
+@font-face {
+    font-family: 'Circular';
+    src: url(fonts/CircularStd-Book.ttf);
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: 'Circular';
+    src: url(fonts/CircularStd-Medium.ttf);
+    font-weight: 500;
+}
+
 :root {
     --side-section-color: #0F0F0F;
     --playbar-color: #181818;
@@ -23,16 +53,17 @@
     --song-card-color: #181818;
     --main-color: #5865f2;
     --secondary-color: #3f3f3f;
-    --muted-text-color: #808080;
+    --muted-text-color: #A8A8A8;
+    --selection-color: #282828;
 
     --side-section-width: 350px;
     --playbar-height: 90px;
 }
 
 html {
-    font-family: 'Inter';
-    font-size: 14px;
-    font-weight: 500;
+    font-family: 'Circular';
+    font-size: 16px;
+    font-weight: 400;
     color: rgb(230, 230, 230);
     overflow: hidden;
 }
@@ -48,7 +79,7 @@ html {
 /* title bar */
 
 .title-bar {
-    height: 35px;
+    height: 40px;
     display: flex;
     justify-content: space-between;
     -webkit-app-region: drag;
@@ -73,6 +104,7 @@ html {
 }
 
 .menu-option {
+    display: none;
     cursor: pointer;
     padding: 5px 2.5px 5px 2.5px;
 
@@ -97,10 +129,10 @@ html {
 /* minimize maximize close buttons */
 
 .button-highlight {
-    height: 25px;
-    width: 25px;
-    background-size: 20px;
-    border-radius: 6px;
+    height: 30px;
+    width: 30px;
+    background-size: 30px;
+    border-radius: 5px;
     transition: 0.2s;
 }
 
@@ -117,9 +149,7 @@ html {
     }
 
     &:hover .button-highlight {
-        background-color: var(--secondary-color);
-        width: 35px;
-        height: 35px;
+        background-color: var(--selection-color);
     }
 
     &:active .button-highlight {
@@ -130,17 +160,25 @@ html {
 
 .minimize-button {
     background: url(img/window-minimize.svg) center no-repeat;
+    background-size: 15px;
 }
 
 .maximize-button {
     background: url(img/window-maximize.svg) center no-repeat;
+    background-size: 15px;
 }
 
 .close-button {
     background: url(img/window-close.svg) center no-repeat;
+    background-size: 15px;
 }
 
 /* app sections */
+
+:is(.queue, .library) > p {
+    font-size: 1rem;
+    font-weight: 400;
+}
 
 .queue {
     position: absolute;
@@ -188,6 +226,46 @@ html {
     justify-content: space-between;
 }
 
+/* queue list */
+
+.queue-list {
+    margin: 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.queue-element {
+    height: 45px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border-radius: 4px;
+}
+
+.queue-element-info {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+.queue-element-artist {
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: var(--muted-text-color);
+}
+
+.queue-element-title {
+    font-size: 1rem;
+    font-weight: 400;
+}
+
+.queue-element-cover {
+    height: 100%;
+    border-radius: 3px;
+}
+
 /* songs list */
 
 .songs-list {
@@ -195,22 +273,22 @@ html {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
     gap: 20px;
-    padding: 20px;
+    padding: 30px;
     scrollbar-width: none;
     overflow-y: scroll;
 }
 
 .song-element {
-    aspect-ratio: 1 / 1.3;
+    aspect-ratio: 1 / 1.4;
     background-color: var(--song-card-color);
-    padding: 20px;
+    padding: 15px;
     border-radius: 7px;
     text-wrap: nowrap;
     cursor: pointer;
-    transition: 0.2s;
+    transition: 0.3s ease;
 
     &:hover {
-        background-color: var(--secondary-color);
+        background-color: var(--selection-color);
     }
 
     &:active {
@@ -221,14 +299,19 @@ html {
 .song-element-cover {
     width: 100%;
     border-radius: 5px;
+    box-shadow: 0 0 24px 0 rgba(0, 0, 0, 0.5);
 }
 
 .song-element-artist {
+    font-size: 0.875rem;
+    font-weight: 400;
     color: var(--muted-text-color);
 }
 
 .song-element-title {
-    margin: 7px 0;
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 15px 0;
 }
 
 /* cover art */
@@ -270,11 +353,13 @@ html {
     gap: 5px;
 
     .playing-song-title {
-        font-size: 14px;
+        font-size: 0.875rem;
+        font-weight: 500;
     }
-    
+
     .playing-song-artist {
-        font-size: 12px;
+        font-size: 0.6875rem;
+        font-weight: 500;
         color: var(--muted-text-color);
     }
 }
@@ -287,9 +372,39 @@ html {
     align-items: center;
 }
 
+.play-control-buttons {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+
+    & > div {
+        transition: 0.2s;
+
+        &:hover {
+            filter: brightness(120%);
+        }
+    }
+}
+
 .play-pause {
     height: 35px;
     width: 35px;
+    background-color: var(--main-color);
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.prev-song {
+    height: 25px;
+    width: 25px;
+    background-color: var(--main-color);
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.next-song {
+    height: 25px;
+    width: 25px;
     background-color: var(--main-color);
     border-radius: 50%;
     cursor: pointer;
@@ -364,9 +479,9 @@ html {
 
 .custom-scrollbar {
     position: absolute;
-    top: 6px;
-    right: 6px;
-    bottom: 6px;
+    top: 5px;
+    right: 5px;
+    bottom: 5px;
     width: 8px;
 }
 

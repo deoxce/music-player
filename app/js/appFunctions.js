@@ -1,40 +1,69 @@
 import Song from './Song.js';
 
 const pathToDir = 'C:/Users/deoxce/Music/test/';
-const songs = await Song.getSongs(pathToDir);
-
-createSongElements(songs);
+const albums = await Song.getSongs(pathToDir);
+createSongElements(albums);
 
 let playingSong = new Audio();
+let queue = [];
+let currentSongIdQueue;
 
-function createSongElements(songs) {
-    songs.forEach((song, index) => {
-        const songTitle = document.createElement('p');
-        songTitle.classList.add('song-element-title');
-        songTitle.textContent = song.title;
+function createSongElements(albums) {
+    for (const album in albums) {
+        if (albums.hasOwnProperty(album)) {
 
-        const songArtist = document.createElement('p');
-        songArtist.classList.add('song-element-artist');
-        songArtist.textContent = song.artists[0];
+            const firstSong = albums[album][0]; // for album info
 
-        const songCover = document.createElement('img');
-        songCover.classList.add('song-element-cover');
-        songCover.src = song.imageUrl;
+            const songTitle = document.createElement('p');
+            songTitle.classList.add('song-element-title');
+            songTitle.textContent = firstSong.album;
+    
+            const songArtist = document.createElement('p');
+            songArtist.classList.add('song-element-artist');
+            songArtist.textContent = firstSong.albumartist;
+    
+            const songCover = document.createElement('img');
+            songCover.classList.add('song-element-cover');
+            songCover.src = firstSong.imageUrl;
+    
+            const songElement = document.createElement('div');
+            songElement.addEventListener('click', () => {
+                queue = albums[album];
+                playSong(firstSong);
+            });
+            songElement.append(songCover);
+            songElement.append(songTitle);
+            songElement.append(songArtist);
+    
+            songElement.classList.add('song-element');
+    
+            const songsList = document.querySelector('.songs-list');
+            songsList.append(songElement);
+        }
+    }
+}
 
-        const songElement = document.createElement('div');
-        songElement.addEventListener('click', () => {
-            playSong(song);
-        });
-        songElement.append(songCover);
-        songElement.append(songTitle);
-        songElement.append(songArtist);
+const nextSongButton = document.querySelector('.next-song');
+const prevSongButton = document.querySelector('.prev-song');
+nextSongButton.addEventListener('click', nextSong);
+prevSongButton.addEventListener('click', prevSong);
 
-        songElement.classList.add('song-element');
-        songElement.id = index;
+function nextSong() {
+    try {
+        const nextSong = queue[currentSongIdQueue + 1];
+        playSong(nextSong);
+    } catch {
+        console.log('queue is ended');
+    }
+}
 
-        const songsList = document.querySelector('.songs-list');
-        songsList.append(songElement);
-    });
+function prevSong() {
+    try {
+        const prevSong = queue[currentSongIdQueue - 1];
+        playSong(prevSong);
+    } catch {
+        console.log('queue is ended');
+    }
 }
 
 function playSong(song) {
@@ -43,9 +72,17 @@ function playSong(song) {
     }
 
     const volume = playingSong.volume;
-    const pathToTune = pathToDir + song.filename;
+    const pathToTune = song.pathToSong;
+
+    for (let i = 0; i < queue.length; i++) {
+        if (pathToTune === queue[i].pathToSong) {
+            currentSongIdQueue = i;
+            break;
+        }
+    }
 
     playingSong = new Audio(pathToTune);
+    playingSong.addEventListener('ended', nextSong);
     playingSong.play();
     playingSong.volume = volume;
 
@@ -54,7 +91,54 @@ function playSong(song) {
     sliderProgress.style.width = 0;
     sliderThumb.style.left = 0;
 
+    setQueue();
     setMetadata(song);
+}
+
+function setQueue() {
+    let songId = currentSongIdQueue;
+
+    let elements = [];
+    for (songId; songId < queue.length; songId++) {
+
+        const song = queue[songId];
+
+        const songInfo = document.createElement('div');
+        songInfo.classList.add('queue-element-info');
+
+        const songTitle = document.createElement('p');
+        songTitle.classList.add('queue-element-title');
+        songTitle.textContent = song.title;
+
+        const songArtist = document.createElement('p');
+        songArtist.classList.add('queue-element-artist');
+        songArtist.textContent = song.artists[0];
+
+        songInfo.append(songTitle);
+        songInfo.append(songArtist);
+
+        const songCover = document.createElement('img');
+        songCover.classList.add('queue-element-cover');
+        songCover.src = song.imageUrl;
+
+        const queueElement = document.createElement('div');
+        queueElement.addEventListener('click', () => {
+            playSong(song);
+        });
+        queueElement.append(songCover);
+        queueElement.append(songInfo);
+
+        queueElement.classList.add('queue-element');
+
+        elements.push(queueElement);
+    }
+
+    const queueList = document.querySelector('.queue-list');
+    queueList.innerHTML = '';
+    
+    for (const el of elements) {
+        queueList.append(el);
+    }
 }
 
 function setMetadata(song) {
@@ -204,7 +288,7 @@ const updateThumbHeight = () => {
 const updateThumbPosition = () => {
     const contentScrollTop = content.scrollTop;
     const contentHeight = content.scrollHeight;
-    const containerHeight = container.clientHeight - 9;
+    const containerHeight = container.clientHeight - 7.5;
     const scrollRatio = contentScrollTop / (contentHeight - containerHeight);
     const thumbTop = scrollRatio * (containerHeight - thumb.clientHeight);
     thumb.style.top = `${thumbTop}px`;
