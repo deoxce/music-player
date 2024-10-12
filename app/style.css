@@ -366,6 +366,7 @@ html {
 
 .playbar-center {
     height: 100%;
+    width: 900px;
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
@@ -412,8 +413,38 @@ html {
 
 /* sliders */
 
+.slider-container-with-time {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    align-items: center;
+
+    .time-container {
+        position: relative;
+        align-items: center;
+        height: 100%;
+    }
+
+    p {
+        color: var(--muted-text-color);
+        font-size: 0.6875rem;
+        font-weight: 400;
+    }
+
+    .current-time {
+        position: absolute;
+        right: 0;
+    }
+
+    .song-duration {
+        position: absolute;
+        left: 0;
+    }
+}
+
 #progress.slider-container {
-    width: 700px;
+    width: 650px;
 }
 
 #volume.slider-container {

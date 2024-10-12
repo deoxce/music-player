@@ -86,6 +86,14 @@ function playSong(song) {
     playingSong.play();
     playingSong.volume = volume;
 
+    playingSong.addEventListener('loadedmetadata', () => {
+        const songDuration = document.querySelector('.song-duration');
+        songDuration.innerHTML = formatTime(playingSong.duration);
+    });
+
+    const currentTime = document.querySelector('.current-time');
+    currentTime.innerHTML = formatTime(playingSong.currentTime);
+
     const sliderProgress = document.querySelector('#progress .slider-progress');
     const sliderThumb = document.querySelector('#progress .slider-thumb');
     sliderProgress.style.width = 0;
@@ -93,6 +101,16 @@ function playSong(song) {
 
     setQueue();
     setMetadata(song);
+}
+
+function formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+
+    // Добавляем ведущий ноль, если число секунд меньше 10
+    const formattedSeconds = remainingSeconds < 10 ? '0' + remainingSeconds : remainingSeconds;
+
+    return minutes + ':' + formattedSeconds;
 }
 
 function setQueue() {
@@ -230,6 +248,8 @@ progressSliderContainer.addEventListener('mousedown', (event) => {
 document.addEventListener('mouseup', (event) => {
     if (isDraggingProgress) {
         playingSong.currentTime = progressLeft / progressSliderContainer.getBoundingClientRect().width * playingSong.duration;
+        const currentTime = document.querySelector('.current-time');
+        currentTime.innerHTML = formatTime(playingSong.currentTime);
     }
 
     isDraggingProgress = false;
@@ -249,6 +269,7 @@ function moveProgressThumb(event) {
     if (newLeft < 0) {
         newLeft = 0;
     }
+
     if (newLeft > sliderRect.width) {
         newLeft = sliderRect.width;
     }
@@ -268,6 +289,9 @@ setInterval(() => {
 
     progressSliderProgress.style.width = `${newLeft}px`;
     progressSliderThumb.style.left = `${newLeft}px`;
+
+    const currentTime = document.querySelector('.current-time');
+    currentTime.innerHTML = formatTime(playingSong.currentTime);
 }, 1000);
 
 // скролл
