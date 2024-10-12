@@ -184,7 +184,7 @@ html {
     position: absolute;
     top: 0;
     right: 0;
-    padding: 10px 15px;
+    /* padding: 10px 0 0 15px; */
     background-color: var(--side-section-color);
     width: var(--side-section-width);
     height: calc(100vh - var(--playbar-height));
@@ -229,10 +229,22 @@ html {
 /* queue list */
 
 .queue-list {
-    margin: 20px 0;
+    height: 100%;
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 15px;
+    padding: 15px;
+}
+
+.queue-list-container {
+    height: calc(100% - 40px);
+    position: relative;
+}
+
+.queue-title {
+    background-color: var(--playbar-color);
+    padding: 10px 15px;
 }
 
 .queue-element {
@@ -274,8 +286,6 @@ html {
     grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
     gap: 20px;
     padding: 30px;
-    scrollbar-width: none;
-    overflow-y: scroll;
 }
 
 .song-element {
@@ -376,39 +386,46 @@ html {
 .play-control-buttons {
     display: flex;
     align-items: center;
-    gap: 20px;
-
-    & > div {
-        transition: 0.2s;
-
-        &:hover {
-            filter: brightness(120%);
-        }
-    }
+    gap: 15px;
 }
 
 .play-pause {
     height: 35px;
     width: 35px;
-    background-color: var(--main-color);
+    background-image: url(img/play.png);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 37px;
     border-radius: 50%;
-    cursor: pointer;
+
+    &:active {
+        background-size: 35px;
+    }
 }
 
 .prev-song {
-    height: 25px;
-    width: 25px;
-    background-color: var(--main-color);
-    border-radius: 50%;
-    cursor: pointer;
+    height: 35px;
+    width: 35px;
+    background: url(img/skip.png) no-repeat center;
+    transform: rotate(180deg);
+    background-size: 18px;
+    filter: brightness(75%);
+
+    &:hover {
+        filter: brightness(100%);
+    }
 }
 
 .next-song {
-    height: 25px;
-    width: 25px;
-    background-color: var(--main-color);
-    border-radius: 50%;
-    cursor: pointer;
+    height: 35px;
+    width: 35px;
+    background: url(img/skip.png) no-repeat center;
+    background-size: 18px;
+    filter: brightness(75%);
+
+    &:hover {
+        filter: brightness(100%);
+    }
 }
 
 /* sliders */
@@ -497,10 +514,8 @@ html {
 .slider-thumb {
     position: absolute;
     left: 0;
-    width: 12.5px;
-    height: 12.5px;
-    top: 1.25px;
-    bottom: 1.25px;
+    width: 13px;
+    height: 13px;
     border-radius: 50%;
     transform: translateX(-50%);
     z-index: 2;
@@ -508,12 +523,22 @@ html {
 
 /* scrollbar */
 
+.scrollable-content {
+    height: 100%;
+    overflow-y: scroll;
+    scrollbar-width: none;
+}
+
 .custom-scrollbar {
     position: absolute;
     top: 5px;
     right: 5px;
     bottom: 5px;
-    width: 8px;
+    width: 6px;
+}
+
+.queue-list-container .custom-scrollbar {
+    width: 6px;
 }
 
 .custom-thumb {

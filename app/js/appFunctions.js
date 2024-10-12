@@ -7,6 +7,9 @@ createSongElements(albums);
 let playingSong = new Audio();
 let queue = [];
 let currentSongIdQueue;
+let volume = 1;
+
+const playPauseButton = document.querySelector('.play-pause');
 
 function createSongElements(albums) {
     for (const album in albums) {
@@ -28,7 +31,7 @@ function createSongElements(albums) {
     
             const songElement = document.createElement('div');
             songElement.addEventListener('click', () => {
-                queue = albums[album];
+                updateQueue(albums)
                 playSong(firstSong);
             });
             songElement.append(songCover);
@@ -43,49 +46,56 @@ function createSongElements(albums) {
     }
 }
 
+function updateQueue(albums) {
+    queue = [];
+    for (const album in albums) {
+        for (const song of albums[album]) {
+            queue.push(song);
+        }
+    }
+}
+
 const nextSongButton = document.querySelector('.next-song');
 const prevSongButton = document.querySelector('.prev-song');
 nextSongButton.addEventListener('click', nextSong);
 prevSongButton.addEventListener('click', prevSong);
 
 function nextSong() {
-    try {
-        const nextSong = queue[currentSongIdQueue + 1];
-        playSong(nextSong);
-    } catch {
-        console.log('queue is ended');
-    }
+    const nextSong = queue[currentSongIdQueue + 1];
+    // if (nextSong === undefined) {
+    //     console.log('queue is ended');
+    //     return;
+    // }
+    playSong(nextSong);
 }
 
 function prevSong() {
-    try {
-        const prevSong = queue[currentSongIdQueue - 1];
-        playSong(prevSong);
-    } catch {
+    const prevSong = queue[currentSongIdQueue - 1];
+    if (prevSong === undefined) {
         console.log('queue is ended');
+        return;
     }
+    playSong(prevSong);
 }
 
-function playSong(song) {
-    if (!playingSong.paused) {
-        playingSong.pause();
-    }
-
-    const volume = playingSong.volume;
-    const pathToTune = song.pathToSong;
-
+function updateCurrentSongId(song) {
     for (let i = 0; i < queue.length; i++) {
-        if (pathToTune === queue[i].pathToSong) {
+        if (song.pathToSong === queue[i].pathToSong) {
             currentSongIdQueue = i;
             break;
         }
     }
+}
 
-    playingSong = new Audio(pathToTune);
-    playingSong.addEventListener('ended', nextSong);
+async function playSong(song) {
+    playingSong.pause();
+    playingSong = new Audio(song.pathToSong);
     playingSong.play();
     playingSong.volume = volume;
-
+    updateCurrentSongId(song);
+    playPauseButton.style.backgroundImage = 'url(img/pause.png)';
+    
+    playingSong.addEventListener('ended', nextSong);
     playingSong.addEventListener('loadedmetadata', () => {
         const songDuration = document.querySelector('.song-duration');
         songDuration.innerHTML = formatTime(playingSong.duration);
@@ -99,8 +109,8 @@ function playSong(song) {
     sliderProgress.style.width = 0;
     sliderThumb.style.left = 0;
 
-    setQueue();
-    setMetadata(song);
+    await setQueue();
+    await setMetadata(song);
 }
 
 function formatTime(seconds) {
@@ -113,76 +123,84 @@ function formatTime(seconds) {
     return minutes + ':' + formattedSeconds;
 }
 
-function setQueue() {
-    let songId = currentSongIdQueue;
-
-    let elements = [];
-    for (songId; songId < queue.length; songId++) {
-
-        const song = queue[songId];
-
-        const songInfo = document.createElement('div');
-        songInfo.classList.add('queue-element-info');
-
-        const songTitle = document.createElement('p');
-        songTitle.classList.add('queue-element-title');
-        songTitle.textContent = song.title;
-
-        const songArtist = document.createElement('p');
-        songArtist.classList.add('queue-element-artist');
-        songArtist.textContent = song.artists[0];
-
-        songInfo.append(songTitle);
-        songInfo.append(songArtist);
-
-        const songCover = document.createElement('img');
-        songCover.classList.add('queue-element-cover');
-        songCover.src = song.imageUrl;
-
-        const queueElement = document.createElement('div');
-        queueElement.addEventListener('click', () => {
-            playSong(song);
-        });
-        queueElement.append(songCover);
-        queueElement.append(songInfo);
-
-        queueElement.classList.add('queue-element');
-
-        elements.push(queueElement);
-    }
-
-    const queueList = document.querySelector('.queue-list');
-    queueList.innerHTML = '';
+async function setQueue() {
+    return new Promise(async (resolve, reject) => {
+        let elements = [];
+        for (let songId = currentSongIdQueue; songId < queue.length; songId++) {
     
-    for (const el of elements) {
-        queueList.append(el);
-    }
+            const song = queue[songId];
+    
+            const songInfo = document.createElement('div');
+            songInfo.classList.add('queue-element-info');
+    
+            const songTitle = document.createElement('p');
+            songTitle.classList.add('queue-element-title');
+            songTitle.textContent = song.title;
+    
+            const songArtist = document.createElement('p');
+            songArtist.classList.add('queue-element-artist');
+            songArtist.textContent = song.artists[0];
+    
+            songInfo.append(songTitle);
+            songInfo.append(songArtist);
+    
+            const songCover = document.createElement('img');
+            songCover.classList.add('queue-element-cover');
+            songCover.src = song.imageUrl;
+    
+            const queueElement = document.createElement('div');
+            queueElement.addEventListener('click', () => {
+                playSong(song);
+            });
+            queueElement.append(songCover);
+            queueElement.append(songInfo);
+    
+            queueElement.classList.add('queue-element');
+    
+            elements.push(queueElement);
+        }
+    
+        const queueList = document.querySelector('.queue-list');
+        queueList.innerHTML = '';
+        
+        for (const el of elements) {
+            queueList.append(el);
+        }
+
+        const container = document.querySelector('.queue-list-container');
+        scrollUpdate(container);
+        resolve();
+    })
 }
 
-function setMetadata(song) {
-    const imageUrl = song.imageUrl;
+async function setMetadata(song) {
+    return new Promise((resolve, reject) => {
+        const imageUrl = song.imageUrl;
 
-    if (imageUrl === 'undefined') {
-        document.querySelector('.cover-art').style.display = 'none';
-        return;
-    }
+        if (imageUrl === 'undefined') {
+            document.querySelector('.cover-art').style.display = 'none';
+            return;
+        }
+    
+        document.querySelector('.cover-art').style.display = 'block';
+        document.querySelector('.cover-art').src = imageUrl;
+    
+        document.querySelector('.playing-song-title').innerHTML = song.title;
+        document.querySelector('.playing-song-artist').innerHTML = song.artists[0];
 
-    document.querySelector('.cover-art').style.display = 'block';
-    document.querySelector('.cover-art').src = imageUrl;
-
-    document.querySelector('.playing-song-title').innerHTML = song.title;
-    document.querySelector('.playing-song-artist').innerHTML = song.artists[0];
+        resolve();
+    })
 }
 
 // playbar controls
 
-const playPauseButton = document.querySelector('.play-pause');
-
 playPauseButton.addEventListener('click', () => {
     if (playingSong.paused) {
         playingSong.play();
+        playPauseButton.style.backgroundImage = 'url(img/pause.png)';
     } else {
         playingSong.pause();
+        playPauseButton.style.backgroundImage = 'url(img/play.png)';
     }
 });
 
@@ -228,6 +246,7 @@ function moveVolumeThumb(event) {
     volumeSliderProgress.style.width = `${newLeft}px`;
 
     playingSong.volume = newLeft / sliderRect.width;
+    volume = newLeft / sliderRect.width;
 }
 
 // progress slider
@@ -296,60 +315,69 @@ setInterval(() => {
 
 // скролл
 
-const container = document.querySelector('.main-window');
-const content = document.querySelector('.songs-list');
-const thumb = document.querySelector('.custom-thumb');
+const scrollContainer = document.querySelectorAll('.scroll-container');
 
-// Расчёт высоты ползунка в зависимости от содержимого
-const updateThumbHeight = () => {
-    const contentHeight = content.scrollHeight;
-    const containerHeight = container.clientHeight;
-    const thumbHeight = Math.max((containerHeight / contentHeight) * containerHeight, 40); // Минимум 40px
-    thumb.style.height = `${thumbHeight}px`;
-};
+scrollContainer.forEach(container => {
+    scrollUpdate(container);
+});
 
-// Обновление позиции ползунка при прокрутке
-const updateThumbPosition = () => {
-    const contentScrollTop = content.scrollTop;
-    const contentHeight = content.scrollHeight;
-    const containerHeight = container.clientHeight - 7.5;
-    const scrollRatio = contentScrollTop / (contentHeight - containerHeight);
-    const thumbTop = scrollRatio * (containerHeight - thumb.clientHeight);
-    thumb.style.top = `${thumbTop}px`;
-};
 
-// Прокрутка при перетаскивании ползунка
-let isDragging = false;
-let startY;
-let startScrollTop;
+function scrollUpdate(container) {
+    const content = container.querySelector('.scrollable-content');
+    const thumb = container.querySelector('.custom-thumb');
 
-const startDragging = (e) => {
-    isDragging = true;
-    startY = e.clientY;
-    startScrollTop = content.scrollTop;
-};
+    // Расчёт высоты ползунка в зависимости от содержимого
+    const updateThumbHeight = () => {
+        const contentHeight = content.scrollHeight;
+        const containerHeight = container.clientHeight;
+        const thumbHeight = Math.max((containerHeight / contentHeight) * containerHeight, 40); // Минимум 40px
+        thumb.style.height = `${thumbHeight}px`;
+        console.log(thumbHeight);
+    };
 
-const stopDragging = () => {
-    isDragging = false;
-};
+    // Обновление позиции ползунка при прокрутке
+    const updateThumbPosition = () => {
+        const contentScrollTop = content.scrollTop;
+        const contentHeight = content.scrollHeight;
+        const containerHeight = container.clientHeight - 7.5;
+        const scrollRatio = contentScrollTop / (contentHeight - containerHeight);
+        const thumbTop = scrollRatio * (containerHeight - thumb.clientHeight);
+        thumb.style.top = `${thumbTop}px`;
+    };
 
-const onDrag = (e) => {
-    if (!isDragging) return;
-    const deltaY = e.clientY - startY;
-    const contentHeight = content.scrollHeight;
-    const containerHeight = container.clientHeight;
-    const scrollRatio = (contentHeight - containerHeight) / (containerHeight - thumb.clientHeight);
-    content.scrollTop = startScrollTop + deltaY * scrollRatio;
-};
+    // Прокрутка при перетаскивании ползунка
+    let isDragging = false;
+    let startY;
+    let startScrollTop;
 
-thumb.addEventListener('mousedown', startDragging);
-document.addEventListener('mousemove', onDrag);
-document.addEventListener('mouseup', stopDragging);
+    const startDragging = (e) => {
+        isDragging = true;
+        startY = e.clientY;
+        startScrollTop = content.scrollTop;
+    };
 
-// Обновление ползунка при изменении размера окна или содержимого
-window.addEventListener('resize', updateThumbHeight);
-content.addEventListener('scroll', updateThumbPosition);
+    const stopDragging = () => {
+        isDragging = false;
+    };
 
-// Инициализация
-updateThumbHeight();
-updateThumbPosition();
+    const onDrag = (e) => {
+        if (!isDragging) return;
+        const deltaY = e.clientY - startY;
+        const contentHeight = content.scrollHeight;
+        const containerHeight = container.clientHeight;
+        const scrollRatio = (contentHeight - containerHeight) / (containerHeight - thumb.clientHeight);
+        content.scrollTop = startScrollTop + deltaY * scrollRatio;
+    };
+
+    thumb.addEventListener('mousedown', startDragging);
+    document.addEventListener('mousemove', onDrag);
+    document.addEventListener('mouseup', stopDragging);
+
+    // Обновление ползунка при изменении размера окна или содержимого
+    window.addEventListener('resize', updateThumbHeight);
+    content.addEventListener('scroll', updateThumbPosition);
+
+    // Инициализация
+    updateThumbHeight();
+    updateThumbPosition();
+}

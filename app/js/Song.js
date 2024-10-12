@@ -1,5 +1,5 @@
 const { selectCover, parseFile } = require('music-metadata');
-const fs = require('fs');
+const fs = require('fs').promises;
 const path = require('path');
 
 export default class Song {
@@ -27,19 +27,25 @@ export default class Song {
         const cover = selectCover(metadata.common.picture);
         try {
             const image = new Blob([cover.data], { type: 'image/jpeg' });
+
             this.imageUrl = URL.createObjectURL(image);
+
+            // let ogImageUrl = URL.createObjectURL(image);
+            // this.imageUrl = await Song.resizeImage(ogImageUrl, 700, 700);
+
         } catch(error) {
             this.imageUrl = 'img/unnamed.jpg';
+            console.log(error);
         }
     }
 
     static async getSongs(pathToDir, albums = {}) {
-        const files = fs.readdirSync(pathToDir);
-        const extensions = ['.mp3', '.flac'];
+        const files = await fs.readdir(pathToDir);
+        const extensions = ['.mp3', '.flac', '.aac', '.m4a', '.wav', '.ogg', '.opus'];
     
         for (const filename of files) {
             const filePath = path.join(pathToDir, filename);
-            const stats = fs.statSync(filePath);
+            const stats = await fs.stat(filePath);
 
             if (stats.isDirectory()) {
                 await this.getSongs(filePath + '/', albums);
@@ -55,10 +61,36 @@ export default class Song {
                     }
 
                     albums[songAlbum].push(song);
+                    // console.log(song.title);
                 }
             }
         }
     
         return albums;
+    }
+
+    static async resizeImage(blobUrl, newWidth, newHeight) {
+        const img = new Image();
+        img.src = blobUrl;
+    
+        // Ждём загрузки изображения
+        await new Promise((resolve) => (img.onload = resolve));
+    
+        // Создаём canvas для изменения размера
+        const canvas = document.createElement('canvas');
+        canvas.width = newWidth;
+        canvas.height = newHeight;
+    
+        const ctx = canvas.getContext('2d');
+        // Рисуем изображение в новом разрешении
+        ctx.drawImage(img, 0, 0, newWidth, newHeight);
+    
+        // Преобразуем canvas в Blob
+        return new Promise((resolve) => {
+            canvas.toBlob((blob) => {
+                const newBlobUrl = URL.createObjectURL(blob);
+                resolve(newBlobUrl);
+            }, 'image/jpeg'); // Укажите тип изображения, например 'image/png' или 'image/jpeg'
+        });
     }
 }
