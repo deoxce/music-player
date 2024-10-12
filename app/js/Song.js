@@ -54,6 +54,7 @@ export default class Song {
                 if (extensions.includes(ext)) {
                     const song = new Song();
                     await song.addMetadata(pathToDir, filename);
+                    song.ext = ext;
 
                     const songAlbum = String(song.album);
                     if (!(songAlbum in albums)) {

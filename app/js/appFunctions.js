@@ -62,20 +62,24 @@ prevSongButton.addEventListener('click', prevSong);
 
 function nextSong() {
     const nextSong = queue[currentSongIdQueue + 1];
-    // if (nextSong === undefined) {
-    //     console.log('queue is ended');
-    //     return;
-    // }
-    playSong(nextSong);
+
+    if (nextSong === undefined) {
+        console.log('queue is ended');
+        return;
+    }
+
+    playSong(nextSong, true, false);
 }
 
 function prevSong() {
     const prevSong = queue[currentSongIdQueue - 1];
+
     if (prevSong === undefined) {
         console.log('queue is ended');
         return;
     }
-    playSong(prevSong);
+
+    playSong(prevSong, false, true);
 }
 
 function updateCurrentSongId(song) {
@@ -87,7 +91,17 @@ function updateCurrentSongId(song) {
     }
 }
 
-async function playSong(song) {
+let isAnimatingNow = false;
+let stopAnimation = false;
+
+async function playSong(song, isSongNext, isSongPrev) {
+
+    await setQueue();
+    
+    if (isAnimatingNow) {
+        stopAnimation = true;
+    }
+
     playingSong.pause();
     playingSong = new Audio(song.pathToSong);
     playingSong.play();
@@ -109,18 +123,64 @@ async function playSong(song) {
     sliderProgress.style.width = 0;
     sliderThumb.style.left = 0;
 
-    await setQueue();
     await setMetadata(song);
+
+    if (!(isSongNext || isSongPrev)) {
+        await setQueue();
+    }
+
+    if (isSongNext) {
+        isAnimatingNow = true;
+        animateNextSong(1000);
+    }
+
+    if (isSongPrev) {
+        await setQueue();
+    }
 }
 
-function formatTime(seconds) {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = Math.floor(seconds % 60);
+function animateNextSong(duration) {
+    const elementIn = document.querySelector('.next-up-first');
+    elementIn.classList.add('fadeIn');
 
-    // Добавляем ведущий ноль, если число секунд меньше 10
-    const formattedSeconds = remainingSeconds < 10 ? '0' + remainingSeconds : remainingSeconds;
+    const startTime = performance.now();
+    requestAnimationFrame(animate);
 
-    return minutes + ':' + formattedSeconds;
+    function animate(currentTime) {
+        let timeFraction = (currentTime - startTime) / duration;
+        if (timeFraction > 1) timeFraction = 1;
+
+        let progress = easeOutExpo(timeFraction);
+        if (progress < 0) progress = 0;
+
+        if (stopAnimation) {
+            timeFraction = 1;
+            progress = 1;
+        }
+
+        animateNextSongTransition(progress);
+
+        if (timeFraction < 1) {
+            requestAnimationFrame(animate);
+        } else {
+            isAnimatingNow = false;
+            stopAnimation = false;
+        }
+    }
+}
+
+function easeOutExpo(x) {
+    return x === 1 ? 1 : 1 - Math.pow(2, -10 * x);
+}
+
+function animateNextSongTransition(progress) {
+    const elementOut = document.querySelector('.now-playing');
+    const elementIn = document.querySelector('.next-up-first');
+    const otherElements = document.querySelector('.next-up-list');
+    
+    elementOut.style.opacity = 1 - (1 * progress);
+    elementIn.style.top = -(99 * progress) + 'px';
+    otherElements.style.top = -(60 * progress) + 'px';
 }
 
 async function setQueue() {
@@ -133,16 +193,32 @@ async function setQueue() {
             const songInfo = document.createElement('div');
             songInfo.classList.add('queue-element-info');
     
-            const songTitle = document.createElement('p');
-            songTitle.classList.add('queue-element-title');
-            songTitle.textContent = song.title;
+            const firstLine = document.createElement('p');
+            firstLine.classList.add('queue-element-title');
+            firstLine.textContent = `${song.title}`;
+
+            // firstLine.textContent = `${song.artists[0]} - ${song.title}`;
     
-            const songArtist = document.createElement('p');
-            songArtist.classList.add('queue-element-artist');
-            songArtist.textContent = song.artists[0];
+            const secondLine = document.createElement('p');
+            secondLine.classList.add('queue-element-artist');
+
+            // const sampleRate = Math.round(song.sampleRate / 1000);
+            // const bitrate = Math.round(song.bitrate / 1000);
+            // const ext = String(song.ext).slice(1).toUpperCase();
+
+            // let bitsPerSample;
+
+            // if (song.bitsPerSample !== undefined) {
+            //     bitsPerSample = song.bitsPerSample + ' bit ';
+            // } else {
+            //     bitsPerSample = '';
+            // }
+
+            // secondLine.textContent = `${ext} :: ${bitsPerSample}${sampleRate} kHz, ${bitrate} kbps`;
+            secondLine.textContent = `${song.artists.join(', ')}`;
     
-            songInfo.append(songTitle);
-            songInfo.append(songArtist);
+            songInfo.append(firstLine);
+            songInfo.append(secondLine);
     
             const songCover = document.createElement('img');
             songCover.classList.add('queue-element-cover');
@@ -154,18 +230,43 @@ async function setQueue() {
             });
             queueElement.append(songCover);
             queueElement.append(songInfo);
-    
+
+            if (songId === currentSongIdQueue) {
+                queueElement.classList.add('now-playing');
+            } else if (songId === currentSongIdQueue + 1) {
+                queueElement.classList.add('next-up-first');
+            }
+
             queueElement.classList.add('queue-element');
     
             elements.push(queueElement);
         }
-    
+        
+        const nextUpList = document.createElement('div');
+        nextUpList.classList.add('next-up-list');
+
         const queueList = document.querySelector('.queue-list');
         queueList.innerHTML = '';
-        
-        for (const el of elements) {
-            queueList.append(el);
+
+        for (let i = 0; i < elements.length; i++) {
+            if (i === 0) {
+                const nowPlaying = document.createElement('p');
+                nowPlaying.classList.add('now-playing-title');
+                nowPlaying.textContent = 'now playing';
+                queueList.append(nowPlaying);
+                queueList.append(elements[i]);
+            }else if (i === 1) {
+                const nextUp = document.createElement('p');
+                nextUp.classList.add('next-up-title');
+                nextUp.textContent = 'next up';
+                queueList.append(nextUp);
+                queueList.append(elements[i]);
+            } else {
+                nextUpList.append(elements[i]);
+            }
         }
+
+        queueList.append(nextUpList);
 
         const container = document.querySelector('.queue-list-container');
         scrollUpdate(container);
@@ -186,10 +287,20 @@ async function setMetadata(song) {
         document.querySelector('.cover-art').src = imageUrl;
     
         document.querySelector('.playing-song-title').innerHTML = song.title;
-        document.querySelector('.playing-song-artist').innerHTML = song.artists[0];
+        document.querySelector('.playing-song-artist').innerHTML = song.artists.join(', ');
 
         resolve();
     })
+}
+
+function formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+
+    // Добавляем ведущий ноль, если число секунд меньше 10
+    const formattedSeconds = remainingSeconds < 10 ? '0' + remainingSeconds : remainingSeconds;
+
+    return minutes + ':' + formattedSeconds;
 }
 
 // playbar controls
@@ -332,7 +443,6 @@ function scrollUpdate(container) {
         const containerHeight = container.clientHeight;
         const thumbHeight = Math.max((containerHeight / contentHeight) * containerHeight, 40); // Минимум 40px
         thumb.style.height = `${thumbHeight}px`;
-        console.log(thumbHeight);
     };
 
     // Обновление позиции ползунка при прокрутке

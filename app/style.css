@@ -1,56 +1,13 @@
 @font-face {
     font-family: 'Inter';
-    src: url(fonts/Inter-ExtraLight.ttf);
-    font-weight: 200;
-}
-
-@font-face {
-    font-family: 'Inter';
-    src: url(fonts/Inter-Light.ttf);
-    font-weight: 300;
-}
-
-@font-face {
-    font-family: 'Inter';
-    src: url(fonts/Inter-Regular.ttf);
-    font-weight: 400;
-}
-
-@font-face {
-    font-family: 'Inter';
-    src: url(fonts/Inter-Medium.ttf);
-    font-weight: 500;
-}
-
-@font-face {
-    font-family: 'Circular';
-    src: url(fonts/CircularStd-Black.ttf);
-    font-weight: 700;
-}
-
-@font-face {
-    font-family: 'Circular';
-    src: url(fonts/CircularStd-Bold.ttf);
-    font-weight: 600;
-}
-
-@font-face {
-    font-family: 'Circular';
-    src: url(fonts/CircularStd-Book.ttf);
-    font-weight: 400;
-}
-
-@font-face {
-    font-family: 'Circular';
-    src: url(fonts/CircularStd-Medium.ttf);
-    font-weight: 500;
+    src: url(fonts/Inter-VariableFont_opsz\,wght.ttf);
 }
 
 :root {
     --side-section-color: #0F0F0F;
     --playbar-color: #181818;
     --main-window-color: #121212;
-    --song-card-color: #181818;
+    --song-card-color: #18181800;
     --main-color: #5865f2;
     --secondary-color: #3f3f3f;
     --muted-text-color: #A8A8A8;
@@ -61,7 +18,7 @@
 }
 
 html {
-    font-family: 'Circular';
+    font-family: 'Inter';
     font-size: 16px;
     font-weight: 400;
     color: rgb(230, 230, 230);
@@ -233,7 +190,7 @@ html {
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    /* gap: 15px; */
     padding: 15px;
 }
 
@@ -243,16 +200,58 @@ html {
 }
 
 .queue-title {
-    background-color: var(--playbar-color);
+    /* background-color: var(--playbar-color); */
     padding: 10px 15px;
 }
 
 .queue-element {
-    height: 45px;
+    padding: 7.5px;
+    height: 60px;
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 15px;
     border-radius: 4px;
+    cursor: pointer;
+    transition: 0.1s ease;
+
+    &:hover {
+        /* filter: brightness(80%); */
+        background-color: var(--selection-color);
+    }
+
+    &:active {
+        background-color: var(--main-color);
+        transition: 0.2s ease;
+    }
+
+    &.now-playing {
+        .queue-element-title {
+            color: var(--main-color) !important;
+        }
+    }
+}
+
+.next-up-first {
+    position: relative;
+}
+
+.next-up-list {
+    position: relative;
+    /* height: 100%; */
+}
+
+.fadeIn {
+    animation: 0.2s fadeIn forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        color: white;
+    }
+
+    to {
+        color: var(--main-color);
+    }
 }
 
 .queue-element-info {
@@ -260,22 +259,33 @@ html {
     display: flex;
     flex-direction: column;
     justify-content: space-around;
-}
-
-.queue-element-artist {
-    font-size: 0.875rem;
-    font-weight: 400;
-    color: var(--muted-text-color);
+    transition: 0.2s;
+    text-wrap: nowrap;
 }
 
 .queue-element-title {
-    font-size: 1rem;
-    font-weight: 400;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.queue-element-artist {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--muted-text-color);
 }
 
 .queue-element-cover {
     height: 100%;
     border-radius: 3px;
+}
+
+.now-playing-title, .next-up-title {
+    font-size: 0.95rem;
+    color: gray;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    margin-left: 12.5px;
+    font-weight: 600;
 }
 
 /* songs list */
@@ -320,7 +330,7 @@ html {
 
 .song-element-title {
     font-size: 1rem;
-    font-weight: 700;
+    font-weight: 600;
     margin: 15px 0;
 }
 
