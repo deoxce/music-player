@@ -132,9 +132,9 @@ html {
 
 /* app sections */
 
-:is(.queue, .library) > p {
+:is(.queue-title, .library) > p {
     font-size: 1rem;
-    font-weight: 400;
+    font-weight: 800;
 }
 
 .queue {
@@ -285,7 +285,7 @@ html {
     margin-top: 15px;
     margin-bottom: 5px;
     margin-left: 12.5px;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 /* songs list */
@@ -330,7 +330,7 @@ html {
 
 .song-element-title {
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: 700;
     margin: 15px 0;
 }
 
@@ -374,7 +374,7 @@ html {
 
     .playing-song-title {
         font-size: 0.875rem;
-        font-weight: 500;
+        font-weight: 700;
     }
 
     .playing-song-artist {
@@ -541,9 +541,9 @@ html {
 
 .custom-scrollbar {
     position: absolute;
-    top: 5px;
+    top: 0px;
     right: 5px;
-    bottom: 5px;
+    bottom: 0px;
     width: 6px;
 }
 
