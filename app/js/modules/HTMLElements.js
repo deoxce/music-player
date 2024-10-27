@@ -1,5 +1,4 @@
-import { playSong } from './utils.js';
-import { updateScroll } from './utils.js';
+import { playSong, updateScroll, updateCurrentSongId, updateNextUp } from './utils.js';
 
 export function createSongElements(albums) {
     for (const albumName in albums) {
@@ -17,24 +16,41 @@ export function createSongElements(albums) {
         songCover.classList.add('song-element-cover');
         songCover.src = firstSongInAlbum.imageUrl;
 
-        const songElement = document.createElement('div');
-        songElement.addEventListener('click', () => {
-            window.queue = [];
+        const nextInQueueButton = document.createElement('div');
+        nextInQueueButton.classList.add('song-element-next-in-queue-button');
+        nextInQueueButton.addEventListener('click', () => {
+            for (const song of albums[albumName]) {
+                window.queue['nextInQueue'].push(song);
+            }
+
+            createQueueElements()
+        });
+
+        const playButton = document.createElement('div');
+        playButton.classList.add('song-element-play-button');
+        playButton.addEventListener('click', () => {
+            window.playlist = [];
             
             for (const albumName in albums) {
                 for (const song of albums[albumName]) {
-                    window.queue.push(song);
+                    window.playlist.push(song);
                 }
             }
 
+            updateCurrentSongId(firstSongInAlbum);
+            updateNextUp();
+
             playSong(firstSongInAlbum);
         });
+        
+        const songElement = document.createElement('div');
+        songElement.classList.add('song-element');
 
         songElement.append(songCover);
         songElement.append(songTitle);
         songElement.append(songArtist);
-
-        songElement.classList.add('song-element');
+        songElement.append(nextInQueueButton);
+        songElement.append(playButton);
 
         const songsList = document.querySelector('.songs-list');
         songsList.append(songElement);
@@ -45,72 +61,72 @@ export function createSongElements(albums) {
 }
 
 export function createQueueElements() {
-    let elements = [];
-    for (let songId = window.currentSongId; songId < window.queue.length && songId < window.currentSongId + 50; songId++) {
+    const nowPlayingList = document.querySelector('.now-playing-list');
+    const nextInQueueList = document.querySelector('.next-in-queue-list');
+    const nextUpList = document.querySelector('.next-up-list');
 
-        const song = window.queue[songId];
+    const nowPlayingTitle = document.querySelector('.now-playing-title');
+    const nextInQueueTitle = document.querySelector('.next-in-queue-title');
+    const nextUpTitle = document.querySelector('.next-up-title');
 
-        const songInfo = document.createElement('div');
-        songInfo.classList.add('queue-element-info');
+    nowPlayingList.innerHTML = '';
+    nextInQueueList.innerHTML = '';
+    nextUpList.innerHTML = '';
 
-        const firstLine = document.createElement('p');
-        firstLine.classList.add('queue-element-title');
-        firstLine.textContent = `${song.title}`;
+    for (const queueType in window.queue) {
+        for (let i = 0; i < window.queue[queueType].length && i < 80; i++) {
+            const song = window.queue[queueType][i];
 
-        const secondLine = document.createElement('p');
-        secondLine.classList.add('queue-element-artist');
-        secondLine.textContent = `${song.artists.join(', ')}`;
+            const songInfo = document.createElement('div');
+            songInfo.classList.add('queue-element-info');
 
-        songInfo.append(firstLine);
-        songInfo.append(secondLine);
+            const firstLine = document.createElement('p');
+            firstLine.classList.add('queue-element-title');
+            firstLine.textContent = `${song.title}`;
 
-        const songCover = document.createElement('img');
-        songCover.classList.add('queue-element-cover');
-        songCover.src = song.imageUrl;
+            const secondLine = document.createElement('p');
+            secondLine.classList.add('queue-element-artist');
+            secondLine.textContent = `${song.artists.join(', ')}`;
 
-        const queueElement = document.createElement('div');
-        queueElement.addEventListener('click', () => {
-            playSong(song);
-        });
-        queueElement.append(songCover);
-        queueElement.append(songInfo);
+            songInfo.append(firstLine);
+            songInfo.append(secondLine);
 
-        if (songId === window.currentSongId) {
-            queueElement.classList.add('now-playing');
-        } else if (songId === window.currentSongId + 1) {
-            queueElement.classList.add('next-up-first');
+            const songCover = document.createElement('img');
+            songCover.classList.add('queue-element-cover');
+            songCover.src = song.imageUrl;
+
+            const queueElement = document.createElement('div');
+            queueElement.append(songCover);
+            queueElement.append(songInfo);
+            queueElement.classList.add('queue-element');
+            
+            if (queueType == 'nowPlaying') {
+                if (window.playingSong.loop) queueElement.classList.add('repeat-container');
+                queueElement.classList.add('now-playing');
+                nowPlayingList.append(queueElement);
+
+            } else if (queueType == 'nextInQueue') {
+                queueElement.addEventListener('click', () => {
+                    window.queue['nextInQueue'] = window.queue['nextInQueue'].slice(i + 1);
+                    console.log(window.queue['nextInQueue']);
+                    playSong(song);
+                });
+                nextInQueueList.append(queueElement);
+
+            } else if (queueType == 'nextUp') {
+                queueElement.addEventListener('click', () => {
+                    updateCurrentSongId(song);
+                    updateNextUp();
+                    playSong(song);
+                });
+                nextUpList.append(queueElement);
+            }
+
+            nowPlayingTitle.style.display = nowPlayingList.innerHTML == '' ? 'none' : 'block';
+            nextInQueueTitle.style.display = nextInQueueList.innerHTML == '' ? 'none' : 'block';
+            nextUpTitle.style.display = nextUpList.innerHTML == '' ? 'none' : 'block';
         }
-
-        queueElement.classList.add('queue-element');
-
-        elements.push(queueElement);
     }
-    
-    const nextUpList = document.createElement('div');
-    nextUpList.classList.add('next-up-list');
-
-    const queueList = document.querySelector('.queue-list');
-    queueList.innerHTML = '';
-
-    for (let i = 0; i < elements.length; i++) {
-        if (i === 0) {
-            const nowPlaying = document.createElement('p');
-            nowPlaying.classList.add('now-playing-title');
-            nowPlaying.textContent = 'now playing';
-            queueList.append(nowPlaying);
-            queueList.append(elements[i]);
-        } else if (i === 1) {
-            const nextUp = document.createElement('p');
-            nextUp.classList.add('next-up-title');
-            nextUp.textContent = 'next up';
-            queueList.append(nextUp);
-            queueList.append(elements[i]);
-        } else {
-            nextUpList.append(elements[i]);
-        }
-    }
-
-    queueList.append(nextUpList);
 
     const container = document.querySelector('.queue-list-container');
     updateScroll(container);

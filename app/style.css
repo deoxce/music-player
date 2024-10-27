@@ -185,23 +185,22 @@ html {
 
 /* queue list */
 
+.queue-title {
+    /* background-color: var(--playbar-color); */
+    padding: 10px 15px;
+}
+
+.queue-list-container {
+    height: calc(100% - 90px);
+    position: relative;
+}
+
 .queue-list {
     height: 100%;
     position: relative;
     display: flex;
     flex-direction: column;
-    /* gap: 15px; */
-    padding: 15px;
-}
-
-.queue-list-container {
-    height: calc(100% - 40px);
-    position: relative;
-}
-
-.queue-title {
-    /* background-color: var(--playbar-color); */
-    padding: 10px 15px;
+    padding: 0 17px 0 15px;
 }
 
 .queue-element {
@@ -215,7 +214,6 @@ html {
     transition: 0.1s ease;
 
     &:hover {
-        /* filter: brightness(80%); */
         background-color: var(--selection-color);
     }
 
@@ -237,21 +235,6 @@ html {
 
 .next-up-list {
     position: relative;
-    /* height: 100%; */
-}
-
-.fadeIn {
-    animation: 0.2s fadeIn forwards;
-}
-
-@keyframes fadeIn {
-    from {
-        color: white;
-    }
-
-    to {
-        color: var(--main-color);
-    }
 }
 
 .queue-element-info {
@@ -279,13 +262,29 @@ html {
     border-radius: 3px;
 }
 
-.now-playing-title, .next-up-title {
+.now-playing-title, .next-in-queue-title, .next-up-title {
     font-size: 0.95rem;
     color: gray;
     margin-top: 15px;
     margin-bottom: 5px;
     margin-left: 12.5px;
     font-weight: 700;
+    display: none;
+}
+
+.repeat {
+    height: 20px;
+    width: 20px;
+    margin: 15px 15px 10px 15px;
+
+    & > path {
+        fill: var(--secondary-color);
+    }
+}
+
+.repeat-container {
+    transition: none !important;
+    outline: 2px solid var(--main-color);
 }
 
 /* songs list */
@@ -299,20 +298,16 @@ html {
 }
 
 .song-element {
+    position: relative;
     aspect-ratio: 1 / 1.4;
     background-color: var(--song-card-color);
     padding: 15px;
     border-radius: 7px;
     text-wrap: nowrap;
-    cursor: pointer;
     transition: 0.3s ease;
 
     &:hover {
         background-color: var(--selection-color);
-    }
-
-    &:active {
-        background-color: var(--main-color);
     }
 }
 
@@ -332,6 +327,40 @@ html {
     font-size: 1rem;
     font-weight: 700;
     margin: 15px 0;
+}
+
+.song-element-next-in-queue-button {
+    position: absolute;
+    bottom: 15px;
+    right: 55px;
+
+    width: 30px;
+    height: 30px;
+    background-color: var(--secondary-color);
+    border-radius: 5px;
+
+    cursor: pointer;
+
+    &:active {
+        background-color: var(--main-color);
+    }
+}
+
+.song-element-play-button {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    
+    width: 30px;
+    height: 30px;
+    background-color: var(--secondary-color);
+    border-radius: 5px;
+
+    cursor: pointer;
+
+    &:active {
+        background-color: var(--main-color);
+    }
 }
 
 /* cover art */
