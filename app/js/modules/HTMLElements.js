@@ -1,4 +1,4 @@
-import { playSong, updateScroll, updateCurrentSongId, updateNextUp } from './utils.js';
+import { playSong, updateScroll, updateCurrentSongId, setQueue } from './utils.js';
 
 export function createSongElements(albums) {
     for (const albumName in albums) {
@@ -19,8 +19,16 @@ export function createSongElements(albums) {
         const nextInQueueButton = document.createElement('div');
         nextInQueueButton.classList.add('song-element-next-in-queue-button');
         nextInQueueButton.addEventListener('click', () => {
-            for (const song of albums[albumName]) {
-                window.queue['nextInQueue'].push(song);
+            for (let i = 1; i < window.queue.length; i++) {
+                if (window.queue[i]['queueType'] == 'nextUp') {
+                    for (let j = albums[albumName].length - 1; j >= 0; j--) {
+                        window.queue.splice(i, 0, {
+                            song: albums[albumName][j],
+                            queueType: 'nextInQueue'
+                        });
+                    }
+                    break;
+                }
             }
 
             createQueueElements()
@@ -38,7 +46,7 @@ export function createSongElements(albums) {
             }
 
             updateCurrentSongId(firstSongInAlbum);
-            updateNextUp();
+            setQueue();
 
             playSong(firstSongInAlbum);
         });
@@ -73,59 +81,56 @@ export function createQueueElements() {
     nextInQueueList.innerHTML = '';
     nextUpList.innerHTML = '';
 
-    for (const queueType in window.queue) {
-        for (let i = 0; i < window.queue[queueType].length && i < 80; i++) {
-            const song = window.queue[queueType][i];
+    for (let i = 0; i < window.queue.length; i++) {
+        const song = window.queue[i]['song'];
+        const queueType = window.queue[i]['queueType'];
 
-            const songInfo = document.createElement('div');
-            songInfo.classList.add('queue-element-info');
+        const songInfo = document.createElement('div');
+        songInfo.classList.add('queue-element-info');
 
-            const firstLine = document.createElement('p');
-            firstLine.classList.add('queue-element-title');
-            firstLine.textContent = `${song.title}`;
+        const firstLine = document.createElement('p');
+        firstLine.classList.add('queue-element-title');
+        firstLine.textContent = `${song.title}`;
 
-            const secondLine = document.createElement('p');
-            secondLine.classList.add('queue-element-artist');
-            secondLine.textContent = `${song.artists.join(', ')}`;
+        const secondLine = document.createElement('p');
+        secondLine.classList.add('queue-element-artist');
+        secondLine.textContent = `${song.artists.join(', ')}`;
 
-            songInfo.append(firstLine);
-            songInfo.append(secondLine);
+        songInfo.append(firstLine);
+        songInfo.append(secondLine);
 
-            const songCover = document.createElement('img');
-            songCover.classList.add('queue-element-cover');
-            songCover.src = song.imageUrl;
+        const songCover = document.createElement('img');
+        songCover.classList.add('queue-element-cover');
+        songCover.src = song.imageUrl;
 
-            const queueElement = document.createElement('div');
-            queueElement.append(songCover);
-            queueElement.append(songInfo);
-            queueElement.classList.add('queue-element');
-            
-            if (queueType == 'nowPlaying') {
-                if (window.playingSong.loop) queueElement.classList.add('repeat-container');
-                queueElement.classList.add('now-playing');
-                nowPlayingList.append(queueElement);
+        const queueElement = document.createElement('div');
+        queueElement.append(songCover);
+        queueElement.append(songInfo);
+        queueElement.classList.add('queue-element');
+        
+        if (i == 0) {
+            if (window.playingSong.loop) queueElement.classList.add('repeat-container');
+            queueElement.classList.add('now-playing');
+            nowPlayingList.append(queueElement);
 
-            } else if (queueType == 'nextInQueue') {
-                queueElement.addEventListener('click', () => {
-                    window.queue['nextInQueue'] = window.queue['nextInQueue'].slice(i + 1);
-                    console.log(window.queue['nextInQueue']);
-                    playSong(song);
-                });
-                nextInQueueList.append(queueElement);
+        } else if (queueType == 'nextInQueue') {
+            queueElement.addEventListener('click', () => {
+                window.queue = window.queue.slice(i);
+                playSong(song);
+            });
+            nextInQueueList.append(queueElement);
 
-            } else if (queueType == 'nextUp') {
-                queueElement.addEventListener('click', () => {
-                    updateCurrentSongId(song);
-                    updateNextUp();
-                    playSong(song);
-                });
-                nextUpList.append(queueElement);
-            }
-
-            nowPlayingTitle.style.display = nowPlayingList.innerHTML == '' ? 'none' : 'block';
-            nextInQueueTitle.style.display = nextInQueueList.innerHTML == '' ? 'none' : 'block';
-            nextUpTitle.style.display = nextUpList.innerHTML == '' ? 'none' : 'block';
+        } else if (queueType == 'nextUp') {
+            queueElement.addEventListener('click', () => {
+                window.queue = window.queue.slice(i);
+                playSong(song);
+            });
+            nextUpList.append(queueElement);
         }
+
+        nowPlayingTitle.style.display = nowPlayingList.innerHTML == '' ? 'none' : 'block';
+        nextInQueueTitle.style.display = nextInQueueList.innerHTML == '' ? 'none' : 'block';
+        nextUpTitle.style.display = nextUpList.innerHTML == '' ? 'none' : 'block';
     }
 
     const container = document.querySelector('.queue-list-container');

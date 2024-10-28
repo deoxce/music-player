@@ -9,12 +9,9 @@ window.volume = 1;
 window.loop = false;
 
 window.playlist = [];
-window.currentSongId;
 
-window.queue = {
-    nowPlaying: [],
-    nextInQueue: [],
-    nextUp: []
-};
+window.queue = [];
+window.currentSongId;
+window.queueHistory = [];
 
 createSongElements(albums);

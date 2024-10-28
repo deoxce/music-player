@@ -21,44 +21,40 @@ export function playPauseSong() {
 }
 
 export function nextSong() {
-    if (window.queue['nextInQueue'].length > 0) {
-        const nextSong = window.queue['nextInQueue'].shift();
-        playSong(nextSong);
-    } else if (window.queue['nextUp'].length > 0) {
-        const nextSong = window.queue['nextUp'].shift();
-        playSong(nextSong);
-    } else {
-        console.log('queue is ended');
-    }
+    const prevSong = window.queue.shift();
+    window.queueHistory.unshift(prevSong);
+    playSong(window.queue[0]['song']);
 }
 
 export function prevSong() {
-    let nextUpFirstId;
-    const nextUpFirstSong = window.queue['nextUp'][0];
-    for (let i = 0; i < window.playlist.length; i++) {
-        if (nextUpFirstSong.pathToSong === window.playlist[i].pathToSong) {
-            nextUpFirstId = i;
+    let nextUpFirstSong = null;
+
+    for (let i = 0; i < window.queue.length; i++) {
+        if (window.queue[i]['queueType'] == 'nextUp') {
+            nextUpFirstSong = window.queue[i]['song'];
             break;
         }
     }
 
-    let prevSong;
+    let prevSong = null;
 
-    if (window.currentSongId == nextUpFirstId - 1) {
-        prevSong = window.playlist[nextUpFirstId - 2];
-    } else {
-        prevSong = window.playlist[nextUpFirstId - 1];
+    for (let i = 0; i < window.playlist.length; i++) {
+        if (nextUpFirstSong.pathToSong == window.playlist[i].pathToSong) {
+            prevSong = window.playlist[i - 1];
+            window.currentSongId = i - 1;
+            break;
+        }
     }
 
-    if (prevSong === undefined) {
-        console.log('queue is ended');
-        return;
-    }
+    window.queue.shift();
 
-    updateCurrentSongId(prevSong);
-    updateNextUp();
+    window.queue.unshift({
+        song: prevSong,
+        queueType: 'nextUp'
+    });
 
-    playSong(prevSong);
+    setQueue();
+    playSong(window.queue[0]['song']);
 }
 
 export function playSong(song) {
@@ -75,8 +71,6 @@ export function playSong(song) {
     window.playingSong.addEventListener('loadedmetadata', setTimeInfo);
     
     resetProgressSlider();
-    updateCurrentSongId(song);
-    window.queue['nowPlaying'][0] = window.playlist[window.currentSongId];
     
     setSongInfo(song);
     createQueueElements();
@@ -122,11 +116,28 @@ export function updateCurrentSongId(song) {
     }
 }
 
-export function updateNextUp() {
-    window.queue['nextUp'] = [];
+export function setQueue() {
+    let newQueue = [];
 
-    for (let i = window.currentSongId + 1; i < window.playlist.length; i++) {
-        window.queue['nextUp'].push(window.playlist[i]);
+    for (let i = 0; i < window.queue.length; i++) {
+        if (window.queue[i]['queueType'] == 'nextInQueue') {
+            newQueue.push(window.queue[i]);
+        }
+    }
+    window.queue = Array.from(newQueue);
+
+    for (let i = window.currentSongId; i < window.playlist.length; i++) {
+        if (i == window.currentSongId) {
+            window.queue.unshift({
+                song: window.playlist[i],
+                queueType: 'nextUp'
+            });
+        } else {
+            window.queue.push({
+                song: window.playlist[i],
+                queueType: 'nextUp'
+            });
+        }
     }
 }
 

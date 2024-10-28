@@ -26,10 +26,10 @@ class Song {
         try {
             const image = new Blob([cover.data], { type: 'image/jpeg' });
 
-            // this.imageUrl = URL.createObjectURL(image);
+            this.imageUrl = URL.createObjectURL(image);
 
-            let ogImageUrl = URL.createObjectURL(image);
-            this.imageUrl = await Song.resizeImage(ogImageUrl, 700, 700);
+            // let ogImageUrl = URL.createObjectURL(image);
+            // this.imageUrl = await Song.resizeImage(ogImageUrl, 700, 700);
 
         } catch(error) {
             this.imageUrl = 'img/unnamed.jpg';
