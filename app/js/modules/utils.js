@@ -46,14 +46,19 @@ export function prevSong() {
         }
     }
 
-    window.queue.shift();
+    let songObject = window.queue.shift();
+    for (let i = 0; i < window.queue.length; i++) {
+        if (window.queue[i]['queueType'] == 'nextUp') {
+            window.queue.splice(i, 0, songObject);
+            break;
+        }
+    }
 
     window.queue.unshift({
         song: prevSong,
         queueType: 'nextUp'
     });
 
-    setQueue();
     playSong(window.queue[0]['song']);
 }
 

@@ -204,6 +204,7 @@ html {
 }
 
 .queue-element {
+    position: relative;
     padding: 7.5px;
     height: 60px;
     display: flex;
@@ -226,6 +227,20 @@ html {
         .queue-element-title {
             color: var(--main-color) !important;
         }
+    }
+}
+
+.queue-element-remove-button {
+    height: 25px;
+    width: 25px;
+    background-color: var(--secondary-color);
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    border-radius: 5px;
+
+    &:hover {
+        background-color: var(--main-color);
     }
 }
 

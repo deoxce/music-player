@@ -102,10 +102,26 @@ export function createQueueElements() {
         const songCover = document.createElement('img');
         songCover.classList.add('queue-element-cover');
         songCover.src = song.imageUrl;
+        
+        const removeButton = document.createElement('div');
+        removeButton.classList.add('queue-element-remove-button');
+
+        if (i !== 0) {
+            songCover.addEventListener('click', () => {
+                window.queue = window.queue.slice(i);
+                playSong(song);
+            });
+
+            removeButton.addEventListener('click', () => {
+                window.queue.splice(i, 1);
+                createQueueElements();
+            });
+        }
 
         const queueElement = document.createElement('div');
         queueElement.append(songCover);
         queueElement.append(songInfo);
+        queueElement.append(removeButton);
         queueElement.classList.add('queue-element');
         
         if (i == 0) {
@@ -114,17 +130,9 @@ export function createQueueElements() {
             nowPlayingList.append(queueElement);
 
         } else if (queueType == 'nextInQueue') {
-            queueElement.addEventListener('click', () => {
-                window.queue = window.queue.slice(i);
-                playSong(song);
-            });
             nextInQueueList.append(queueElement);
 
         } else if (queueType == 'nextUp') {
-            queueElement.addEventListener('click', () => {
-                window.queue = window.queue.slice(i);
-                playSong(song);
-            });
             nextUpList.append(queueElement);
         }
 
