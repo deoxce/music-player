@@ -21,12 +21,51 @@ export function playPauseSong() {
 }
 
 export function nextSong() {
+    if (window.queueLoop) {
+        let nextSong;
+        if (window.currentIdInLoop == window.queue[0].length - 1) {
+            window.currentIdInLoop = 0;
+            nextSong = window.queue[0][window.currentIdInLoop]
+        } else {
+            window.currentIdInLoop = window.currentIdInLoop + 1;
+            nextSong = window.queue[0][window.currentIdInLoop];
+        }
+        playSong(nextSong);
+        return;
+    }
+
     const prevSong = window.queue.shift();
     window.queueHistory.unshift(prevSong);
+
+    if (Array.isArray(window.queue[0])) {
+        const repeatPath = document.querySelector('.repeat > path');
+        repeatPath.style.fill = 'var(--main-color)';
+        window.playingSong.loop = false;
+        window.loop = false;
+
+        window.queueLoop = true;
+        window.currentIdInLoop = 0;
+        playSong(window.queue[0][0]);
+        return;
+    }
+
     playSong(window.queue[0]['song']);
 }
 
 export function prevSong() {
+    if (window.queueLoop) {
+        let prevSong;
+        if (window.currentIdInLoop == 0) {
+            window.currentIdInLoop = window.queue[0].length - 1;
+            prevSong = window.queue[0][window.currentIdInLoop]
+        } else {
+            window.currentIdInLoop = window.currentIdInLoop - 1;
+            prevSong = window.queue[0][window.currentIdInLoop];
+        }
+        playSong(prevSong);
+        return;
+    }
+
     let nextUpFirstSong = null;
 
     for (let i = 0; i < window.queue.length; i++) {
